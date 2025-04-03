@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarot Card Reader</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Tarot Card Reader</h1>
+        
+        <!-- Question Form -->
+        <form id="question-form">
+            <input type="text" id="question" placeholder="Ask your question..." required>
+            <button type="submit">Get Reading</button>
+        </form>
+        
+        <!-- Card Selection Section -->
+        <div id="card-section" style="display: none;">
+            <div id="card-container">
+                <div class="cards-container"></div>
+            </div>
+            <div class="card-slots"></div>
+            <button id="prev-card" class="nav-button">←</button>
+            <button id="next-card" class="nav-button">→</button>
+        </div>
+        
+        <!-- Reading Result Section -->
+        <div id="reading-result" style="display: none;">
+            <h2>Your Reading</h2>
+            <div id="interpretation"></div>
+            
+            <form id="follow-up-form">
+                <input type="text" id="follow-up-question" placeholder="Ask a follow-up question...">
+                <button type="submit">Ask</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html> 

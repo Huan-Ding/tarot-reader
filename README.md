@@ -2,6 +2,15 @@
 
 A modern web application that provides interactive Tarot card readings with beautiful animations and intuitive user experience.
 
+## Privacy Notice
+
+This application is designed with your privacy in mind:
+- No user data is stored or collected
+- All readings are performed in real-time and not saved
+- No cookies are used to track user sessions
+- All interactions are completely anonymous
+- No personal information is required to use the application
+
 ## Features
 
 - Interactive card selection with smooth animations
@@ -14,7 +23,6 @@ A modern web application that provides interactive Tarot card readings with beau
 
 - Python 3.x
 - Flask (Web Framework)
-- SQLite (Database)
 - HTML5/CSS3/JavaScript (Frontend)
 - Jinja2 (Templating)
 
@@ -25,7 +33,6 @@ tarot-reader/
 ├── static/          # Static files (CSS, JS, images)
 ├── templates/       # HTML templates
 ├── app.py          # Main application file
-├── database.py     # Database models and operations
 ├── requirements.txt # Project dependencies
 └── README.md       # Project documentation
 ```

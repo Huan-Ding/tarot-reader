@@ -1,0 +1,461 @@
+/* Base styles */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #e74c3c;
+    --background-color: #f5f6fa;
+    --card-width: 120px;
+    --card-height: 200px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Question form */
+#question-form {
+    width: 100%;
+    max-width: 600px;
+    margin: 2rem auto;
+    text-align: center;
+}
+
+#question-form input {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    margin-bottom: 1rem;
+}
+
+#question-form button {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    background: #4a90e2;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#question-form button:hover {
+    background: #357abd;
+}
+
+/* Card Section Styles */
+#card-section {
+    position: relative;
+    width: 100%;
+    height: 800px;
+    margin: 2rem 0;
+    perspective: 1000px;
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#card-container {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform-style: preserve-3d;
+    margin-bottom: 2rem;
+}
+
+.card {
+    position: absolute;
+    width: var(--card-width);
+    height: var(--card-height);
+    cursor: pointer;
+    transition: transform 0.5s ease;
+    transform-style: preserve-3d;
+    box-sizing: border-box;
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+    box-sizing: border-box;
+}
+
+.card-front,
+.card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    padding: 0.5rem;
+    text-align: center;
+    line-height: 1.2;
+    box-sizing: border-box;
+}
+
+.card-front {
+    background: linear-gradient(45deg, #2c3e50, #3498db);
+    transform: rotateY(180deg);
+    font-weight: bold;
+}
+
+.card-back {
+    background: linear-gradient(45deg, #2c3e50, #3498db);
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+/* Card Slots Styles */
+.card-slots {
+    position: relative;
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
+    z-index: 10;
+    min-height: var(--card-height);
+    margin-top: 2rem;
+}
+
+.card-slot {
+    width: var(--card-width);
+    height: var(--card-height);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: border-color 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    box-sizing: border-box;
+    padding: 0;
+    overflow: hidden;
+}
+
+.card-slot:empty::before {
+    content: '?';
+    font-size: 2.5rem;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.card-slot .card {
+    position: relative;
+    transform: none !important;
+    transition: transform 0.5s ease;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.card-slot .card-inner {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.card-slot .card-front,
+.card-slot .card-back {
+    width: 100%;
+    height: 100%;
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    margin: 0;
+}
+
+.card.selected {
+    transform: translateY(-10px);
+}
+
+.card.revealed .card-inner {
+    transform: rotateY(180deg);
+}
+
+/* Navigation Buttons */
+#prev-card,
+#next-card {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    z-index: 100;
+}
+
+#prev-card:hover,
+#next-card:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+#prev-card {
+    left: 20px;
+}
+
+#next-card {
+    right: 20px;
+}
+
+.nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    z-index: 100;
+}
+
+.nav-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+#prev-card {
+    left: 20px;
+}
+
+#next-card {
+    right: 20px;
+}
+
+/* Reading result */
+#reading-result {
+    width: 100%;
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    backdrop-filter: blur(5px);
+}
+
+#reading-result h2 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+#interpretation {
+    white-space: pre-line;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+#follow-up-form {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+#follow-up-form input {
+    flex: 1;
+    padding: 1rem;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+#follow-up-form button {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 8px;
+    background: #4a90e2;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#follow-up-form button:hover {
+    background: #357abd;
+}
+
+/* Message styles */
+.message,
+.error {
+    position: fixed;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    z-index: 1000;
+    animation: slideDown 0.3s ease-out;
+}
+
+.message {
+    background: rgba(74, 144, 226, 0.9);
+    color: #fff;
+}
+
+.message.loading {
+    background: rgba(46, 204, 113, 0.9);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.message.loading::after {
+    content: '';
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 3px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.error {
+    background: rgba(231, 76, 60, 0.9);
+    color: #fff;
+}
+
+@keyframes slideDown {
+    from {
+        transform: translate(-50%, -100%);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
+
+/* Confirm Button */
+.confirm-button {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    background: #4a90e2;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    z-index: 100;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.confirm-button:hover {
+    background: #357abd;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 1rem;
+    }
+    
+    #card-section {
+        height: 500px;
+    }
+    
+    .card {
+        width: 150px;
+        height: 262px;
+    }
+    
+    .card-slots {
+        gap: 1rem;
+        padding: 1rem;
+    }
+    
+    .card-slot {
+        width: 150px;
+        height: 262px;
+    }
+    
+    #prev-card,
+    #next-card {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    #prev-card {
+        left: 1rem;
+    }
+    
+    #next-card {
+        right: 1rem;
+    }
+    
+    .confirm-button {
+        width: 90%;
+        max-width: 300px;
+    }
+    
+    #follow-up-form {
+        flex-direction: column;
+    }
+    
+    #follow-up-form button {
+        width: 100%;
+    }
+} 
