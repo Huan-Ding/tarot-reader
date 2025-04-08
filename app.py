@@ -5,15 +5,22 @@ from dotenv import load_dotenv
 from openai import OpenAI
 import json
 from typing import List, Dict
+import httpx
 
 load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)  # For session management
 
-# Configure OpenAI API
+# Configure OpenAI API with custom HTTP client
+http_client = httpx.Client(
+    base_url=os.getenv('OPENAI_API_BASE', 'https://api.openai.com/v1'),
+    headers={"Content-Type": "application/json"}
+)
+
 client = OpenAI(
-    api_key=os.getenv('OPENAI_API_KEY')
+    api_key=os.getenv('OPENAI_API_KEY'),
+    http_client=http_client
 )
 
 # Tarot card data
