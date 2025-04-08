@@ -3,6 +3,10 @@ import random
 import os
 from dotenv import load_dotenv
 import openai
+from openai import AzureOpenAI
+
+client = AzureOpenAI(api_key=os.getenv('OPENAI_API_KEY'),
+api_version=os.getenv('OPENAI_API_VERSION', '2020-11-07'))
 import json
 from typing import List, Dict
 
@@ -12,10 +16,8 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)  # For session management
 
 # Configure OpenAI API
-openai.api_key = os.getenv('OPENAI_API_KEY')
-openai.api_base = os.getenv('OPENAI_API_BASE', 'https://api.openai.com/v1')
-openai.api_version = os.getenv('OPENAI_API_VERSION', '2020-11-07')
-openai.api_type = os.getenv('OPENAI_API_TYPE', 'openai')
+# TODO: The 'openai.api_base' option isn't read in the client API. You will need to pass it when you instantiate the client, e.g. 'OpenAI(base_url=os.getenv('OPENAI_API_BASE', 'https://api.openai.com/v1'))'
+# openai.api_base = os.getenv('OPENAI_API_BASE', 'https://api.openai.com/v1')
 
 # Tarot card data
 TAROT_CARDS = {
@@ -62,13 +64,13 @@ def get_llm_recommendation(question: str) -> Dict:
     """Get card count recommendation from LLM based on the question."""
     print("\n=== Starting get_llm_recommendation ===")
     print(f"Question received: {question}")
-    
+
     try:
         # Print API configuration for debugging
         print(f"Using API Base: {openai.api_base}")
         print(f"Using API Version: {openai.api_version}")
         print(f"Using API Type: {openai.api_type}")
-        
+
         prompt = f"""As a tarot reader, recommend how many cards should be drawn for this question:
         Question: {question}
         
@@ -84,32 +86,30 @@ def get_llm_recommendation(question: str) -> Dict:
         }}
         
         Keep the explanation short and concise. Do not include any other text or formatting."""
-        
+
         print("Sending request to OpenAI API...")
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.7,
-                max_tokens=300
-            )
+            response = client.chat.completions.create(model="gpt-4",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.7,
+            max_tokens=300)
             print("API call successful!")
             print(f"Raw response: {response.choices[0].message.content}")
-            
+
             # Clean the response to ensure it's valid JSON
             content = response.choices[0].message.content.strip()
-            
+
             # Find the first '{' and last '}'
             start_idx = content.find('{')
             end_idx = content.rfind('}')
-            
+
             if start_idx == -1 or end_idx == -1:
                 print("No valid JSON object found in response")
                 return {"recommended_cards": 3, "explanation": "Default recommendation for a general reading"}
-                
+
             content = content[start_idx:end_idx+1]
             print(f"Cleaned JSON content: {content}")
-            
+
             # Try to parse the JSON
             try:
                 result = json.loads(content)
@@ -126,14 +126,14 @@ def get_llm_recommendation(question: str) -> Dict:
                 print(f"JSON Decode Error: {str(json_error)}")
                 print(f"Failed content: {content}")
                 return {"recommended_cards": 3, "explanation": "Default recommendation for a general reading"}
-                
-        except openai.error.AuthenticationError as auth_error:
+
+        except openai.AuthenticationError as auth_error:
             print(f"Authentication Error: {str(auth_error)}")
             return {"recommended_cards": 3, "explanation": "Authentication error with API"}
-        except openai.error.APIError as api_error:
+        except openai.APIError as api_error:
             print(f"API Error: {str(api_error)}")
             return {"recommended_cards": 3, "explanation": "API service error"}
-            
+
     except Exception as e:
         print(f"Error in get_llm_recommendation: {str(e)}")
         print(f"Error type: {type(e)}")
@@ -146,7 +146,7 @@ def get_reading_interpretation(question: str, card_ids: List[int]) -> str:
     # Get card data for each selected card
     cards = []
     card_details = ""
-    
+
     try:
         # First, get all card data
         for card_id in card_ids:
@@ -158,22 +158,22 @@ def get_reading_interpretation(question: str, card_ids: List[int]) -> str:
                 rank_index = minor_index % 14
                 suits = ['wands', 'cups', 'swords', 'pentacles']
                 ranks = ['Ace', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Page', 'Knight', 'Queen', 'King']
-                
+
                 card = {
                     'name': f"{ranks[rank_index]} of {suits[suit_index]}",
                     'meaning': f"Traditional meaning of {ranks[rank_index]} of {suits[suit_index]}"
                 }
             cards.append(card)
-        
+
         if not cards:
             return "I apologize, but I couldn't find the selected cards. Please try again."
-        
+
         # Create a detailed prompt with card meanings
         card_details = "\n".join([
             f"- {card['name']}: {card.get('meaning', 'Traditional tarot meaning')}"
             for card in cards
         ])
-        
+
         prompt = f"""As a tarot reader, provide a detailed reading for this question:
         Question: {question}
         
@@ -192,15 +192,13 @@ def get_reading_interpretation(question: str, card_ids: List[int]) -> str:
         3. How the Cards Work Together
         4. Guidance and Recommendations
         """
-        
+
         # Try to get the interpretation from the API
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.9,
-                max_tokens=1000
-            )
+            response = client.chat.completions.create(model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.9,
+            max_tokens=1000)
             return response.choices[0].message.content
         except Exception as api_error:
             print(f"API Error in get_reading_interpretation: {str(api_error)}")
@@ -211,7 +209,7 @@ def get_reading_interpretation(question: str, card_ids: List[int]) -> str:
             {card_details}
             
             Please try again in a moment for a more detailed reading."""
-            
+
     except Exception as e:
         print(f"Error in get_reading_interpretation: {str(e)}")
         return "I apologize, but I'm having trouble interpreting the cards right now. Please try again."
@@ -229,10 +227,10 @@ def recommend_cards():
     try:
         data = request.get_json()
         question = data.get('question', '')
-        
+
         if not question:
             return jsonify({'error': 'Question is required'}), 400
-        
+
         recommendation = get_llm_recommendation(question)
         return jsonify(recommendation)
     except Exception as e:
@@ -249,12 +247,12 @@ def get_reading():
         data = request.get_json()
         question = data.get('question', '')
         card_ids = data.get('cards', [])
-        
+
         if not question or not card_ids:
             return jsonify({'error': 'Question and cards are required'}), 400
-        
+
         interpretation = get_reading_interpretation(question, card_ids)
-        
+
         return jsonify({
             'interpretation': interpretation,
             'cards': [get_card_by_id(card_id) for card_id in card_ids if get_card_by_id(card_id)]
@@ -273,10 +271,10 @@ def follow_up_reading():
         data = request.get_json()
         follow_up_question = data.get('question', '')
         previous_cards = data.get('previous_cards', [])
-        
+
         if not follow_up_question or not previous_cards:
             return jsonify({'error': 'Follow-up question and previous cards are required'}), 400
-        
+
         recommendation = get_llm_recommendation(follow_up_question)
         return jsonify(recommendation)
     except Exception as e:
