@@ -90,7 +90,7 @@ function init() {
     prevButton.addEventListener('click', () => navigateCards('prev'));
     nextButton.addEventListener('click', () => navigateCards('next'));
     
-    // Add event listener for Ask Another Question button
+    // Add event listener for Get Another Reading button
     const askAnotherButton = document.getElementById('ask-another');
     if (askAnotherButton) {
         askAnotherButton.addEventListener('click', resetApplication);
