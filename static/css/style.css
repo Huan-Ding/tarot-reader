@@ -336,25 +336,53 @@ h1 {
     font-size: 0.95rem;
 }
 
+/* Ask Another Question Button */
 .ask-another-button {
-    width: 100%;
-    max-width: 300px;
-    min-height: var(--touch-target-size);
-    padding: 0.8rem;
-    font-size: 0.95rem;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
     border: none;
-    border-radius: 8px;
-    background: #4a90e2;
-    color: #fff;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 1rem;
     cursor: pointer;
-    transition: background 0.3s ease;
-    -webkit-appearance: none;
-    appearance: none;
-    margin-top: 1rem;
+    transition: all 0.3s ease;
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
 }
 
 .ask-another-button:hover {
-    background: #357abd;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, #45a049, #4CAF50);
+}
+
+.ask-another-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments for the button */
+@media (max-width: 768px) {
+    .ask-another-button {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        margin-top: 1rem;
+    }
+}
+
+/* Landscape mode optimizations */
+@media (max-height: 600px) and (orientation: landscape) {
+    .ask-another-button {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        margin-top: 0.8rem;
+    }
 }
 
 /* Message styles */
