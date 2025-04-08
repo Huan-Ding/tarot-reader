@@ -792,4 +792,53 @@ h1 {
 .card-slots {
     perspective: 1000px;
     transform-style: preserve-3d;
+}
+
+/* Privacy Reminder */
+.privacy-reminder {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    text-align: center;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.privacy-reminder i {
+    font-size: 1.5rem;
+    color: #4CAF50;
+    margin-bottom: 0.5rem;
+}
+
+.privacy-reminder p {
+    color: #fff;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin: 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments for privacy reminder */
+@media (max-width: 768px) {
+    .privacy-reminder {
+        margin: 1rem;
+        padding: 0.8rem;
+    }
+    
+    .privacy-reminder p {
+        font-size: 0.8rem;
+    }
+}
+
+/* Landscape mode optimizations */
+@media (max-height: 600px) and (orientation: landscape) {
+    .privacy-reminder {
+        margin: 0.5rem auto;
+        padding: 0.5rem;
+    }
 } 
