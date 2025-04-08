@@ -33,10 +33,24 @@ function getCardName(index) {
         const minorIndex = index - 22;
         const suit = Math.floor(minorIndex / 14);
         const rank = minorIndex % 14;
-        const suits = ["wands", "cups", "swords", "pentacles"];
-        return `${tarotCards.minorArcana[suits[suit]][rank]} of ${suits[suit]}`;
+        const suits = ["Wands", "Cups", "Swords", "Pentacles"];
+        return `${tarotCards.minorArcana[suits[suit].toLowerCase()][rank]} of ${suits[suit]}`;
     }
 }
+
+// Get card image path from card name
+/*
+function getCardImagePath(cardName) {
+    // Handle Major Arcana
+    if (tarotCards.majorArcana.includes(cardName)) {
+        return `../images/cards/Major/${cardName.replace(/ /g, '_')}.jpg`;
+    }
+    
+    // Handle Minor Arcana
+    const [rank, , suit] = cardName.split(' ');
+    return `../images/cards/${suit}/${cardName.replace(/ /g, '_')}.jpg`;
+}
+*/
 
 // DOM Elements
 let questionForm;
@@ -47,7 +61,6 @@ let prevButton;
 let nextButton;
 let readingResult;
 let interpretation;
-let followUpForm;
 
 // Initialize the application
 function init() {
@@ -60,7 +73,6 @@ function init() {
     nextButton = document.getElementById('next-card');
     readingResult = document.getElementById('reading-result');
     interpretation = document.getElementById('interpretation');
-    followUpForm = document.getElementById('follow-up-form');
 
     console.log('DOM elements initialized:', {
         questionForm: !!questionForm,
@@ -70,17 +82,47 @@ function init() {
         prevButton: !!prevButton,
         nextButton: !!nextButton,
         readingResult: !!readingResult,
-        interpretation: !!interpretation,
-        followUpForm: !!followUpForm
+        interpretation: !!interpretation
     });
 
     // Event Listeners
     questionForm.addEventListener('submit', handleQuestionSubmit);
     prevButton.addEventListener('click', () => navigateCards('prev'));
     nextButton.addEventListener('click', () => navigateCards('next'));
-    followUpForm.addEventListener('submit', handleFollowUpQuestion);
+    
+    // Add event listener for Ask Another Question button
+    const askAnotherButton = document.getElementById('ask-another');
+    if (askAnotherButton) {
+        askAnotherButton.addEventListener('click', resetApplication);
+    }
+    
     console.log('Event listeners attached');
     console.log('=== Initialization complete ===');
+}
+
+// Reset application state
+function resetApplication() {
+    console.log('=== Starting resetApplication ===');
+    
+    // Reset state
+    state.question = '';
+    state.selectedCards = [];
+    state.currentCardIndex = 0;
+    state.isRevealed = false;
+    
+    // Hide card section and reading result
+    cardSection.style.display = 'none';
+    readingResult.style.display = 'none';
+    
+    // Show question form
+    questionForm.style.display = 'block';
+    
+    // Clear the question input
+    const questionInput = document.getElementById('question');
+    questionInput.value = '';
+    
+    console.log('Application state reset');
+    console.log('=== Ending resetApplication ===');
 }
 
 // Handle question submission
@@ -197,17 +239,18 @@ function showCardSelection() {
     const cardsContainer = document.createElement('div');
     cardsContainer.className = 'cards-container';
     
+    // Show instructions
+    const message = document.createElement('div');
+    message.className = 'message';
+    message.id = 'selection-message';
+    message.textContent = `Please select ${state.recommendedCards} cards for your reading`;
+    document.body.appendChild(message);
+    
     // Create cards
     createCards(cardsContainer);
     
     // Add cards container to the page
     cardContainer.appendChild(cardsContainer);
-    
-    // Show instructions
-    const message = document.createElement('div');
-    message.className = 'message';
-    message.textContent = `Please select ${state.recommendedCards} cards for your reading`;
-    cardContainer.insertBefore(message, cardsContainer);
     
     // Update card positions
     updateCardPositions();
@@ -231,16 +274,21 @@ function createCards(container) {
     cardIndices.forEach((index, i) => {
         console.log(`Creating card ${i + 1} of ${state.totalCards}`);
         
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.dataset.index = index;
-        
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.index = index;
+    
         const cardInner = document.createElement('div');
         cardInner.className = 'card-inner';
         
         const cardFront = document.createElement('div');
         cardFront.className = 'card-front';
-        cardFront.textContent = getCardName(index);
+        const cardName = getCardName(index);
+        // Comment out image-related code
+        /*
+        cardFront.style.backgroundImage = `url('${getCardImagePath(cardName)}')`;
+        */
+        cardFront.textContent = cardName;
         
         const cardBack = document.createElement('div');
         cardBack.className = 'card-back';
@@ -249,13 +297,13 @@ function createCards(container) {
         cardInner.appendChild(cardBack);
         card.appendChild(cardInner);
         
-        // Add click event listener for card selection
+        // Add click handler for card selection
         card.addEventListener('click', () => handleCardSelection(card));
         
         container.appendChild(card);
     });
     
-    console.log('All cards created and added to container');
+    console.log('Cards created and added to container');
     console.log('=== Ending createCards ===');
 }
 
@@ -386,6 +434,12 @@ function handleCardSelection(card) {
         showConfirmButton();
     }
     
+    // Hide the selection message
+    const selectionMessage = document.getElementById('selection-message');
+    if (selectionMessage) {
+        selectionMessage.remove();
+    }
+    
     console.log('=== Ending handleCardSelection ===');
 }
 
@@ -446,7 +500,7 @@ async function handleConfirmSelection() {
                 cards: state.selectedCards
             })
         });
-
+        
         console.log('Response received:', response);
         const data = await response.json();
         console.log('API Response data:', data);
@@ -495,45 +549,13 @@ function showReadingResult(interpretationText) {
     readingResult.style.display = 'block';
 }
 
-// Handle follow-up question
-async function handleFollowUpQuestion(event) {
-    event.preventDefault();
-    const followUpInput = document.getElementById('follow-up-question');
-    const question = followUpInput.value.trim();
-
-    try {
-        const response = await fetch('/api/follow-up', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                question: question,
-                previous_question: state.question,
-                cards: state.selectedCards
-            })
-        });
-
-        const data = await response.json();
-        if (data.error) {
-            showError(data.error);
-            return;
-        }
-
-        showReadingResult(data.interpretation);
-        followUpInput.value = '';
-    } catch (error) {
-        showError('Failed to get follow-up interpretation. Please try again.');
-    }
-}
-
 // Show message
 function showMessage(message) {
     const messageElement = document.createElement('div');
     messageElement.className = 'message';
     messageElement.textContent = message;
     document.body.appendChild(messageElement);
-
+    
     setTimeout(() => {
         messageElement.remove();
     }, 3000);
@@ -545,7 +567,7 @@ function showError(error) {
     errorElement.className = 'error';
     errorElement.textContent = error;
     document.body.appendChild(errorElement);
-
+    
     setTimeout(() => {
         errorElement.remove();
     }, 3000);
@@ -553,3 +575,4 @@ function showError(error) {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', init); 
+
