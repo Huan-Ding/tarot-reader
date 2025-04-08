@@ -14,7 +14,7 @@ app.secret_key = os.urandom(24)  # For session management
 # Configure OpenAI API
 openai.api_key = os.getenv('OPENAI_API_KEY')
 openai.api_base = os.getenv('OPENAI_API_BASE', 'https://api.openai.com/v1')
-openai.api_version = os.getenv('OPENAI_API_VERSION', '2020-11-07')
+# openai.api_version = os.getenv('OPENAI_API_VERSION', '2020-11-07')
 openai.api_type = os.getenv('OPENAI_API_TYPE', 'openai')
 
 # Tarot card data
