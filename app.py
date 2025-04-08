@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify, session
 import random
 import os
 from dotenv import load_dotenv
-import openai
+from openai import OpenAI
 import json
 from typing import List, Dict
 
@@ -12,10 +12,10 @@ app = Flask(__name__)
 app.secret_key = os.urandom(24)  # For session management
 
 # Configure OpenAI API
-openai.api_key = os.getenv('OPENAI_API_KEY')
-openai.api_base = os.getenv('OPENAI_API_BASE', 'https://api.openai.com/v1')
-# openai.api_version = os.getenv('OPENAI_API_VERSION', '2020-11-07')
-openai.api_type = os.getenv('OPENAI_API_TYPE', 'openai')
+client = OpenAI(
+    api_key=os.getenv('OPENAI_API_KEY'),
+    base_url=os.getenv('OPENAI_API_BASE', 'https://api.openai.com/v1')
+)
 
 # Tarot card data
 TAROT_CARDS = {
@@ -64,11 +64,6 @@ def get_llm_recommendation(question: str) -> Dict:
     print(f"Question received: {question}")
     
     try:
-        # Print API configuration for debugging
-        print(f"Using API Base: {openai.api_base}")
-        print(f"Using API Version: {openai.api_version}")
-        print(f"Using API Type: {openai.api_type}")
-        
         prompt = f"""As a tarot reader, recommend how many cards should be drawn for this question:
         Question: {question}
         
@@ -87,7 +82,7 @@ def get_llm_recommendation(question: str) -> Dict:
         
         print("Sending request to OpenAI API...")
         try:
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.7,
@@ -127,10 +122,7 @@ def get_llm_recommendation(question: str) -> Dict:
                 print(f"Failed content: {content}")
                 return {"recommended_cards": 3, "explanation": "Default recommendation for a general reading"}
                 
-        except openai.error.AuthenticationError as auth_error:
-            print(f"Authentication Error: {str(auth_error)}")
-            return {"recommended_cards": 3, "explanation": "Authentication error with API"}
-        except openai.error.APIError as api_error:
+        except Exception as api_error:
             print(f"API Error: {str(api_error)}")
             return {"recommended_cards": 3, "explanation": "API service error"}
             
@@ -195,7 +187,7 @@ def get_reading_interpretation(question: str, card_ids: List[int]) -> str:
         
         # Try to get the interpretation from the API
         try:
-            response = openai.ChatCompletion.create(
+            response = client.chat.completions.create(
                 model="gpt-3.5-turbo",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.9,
@@ -290,6 +282,49 @@ def follow_up_reading():
 @app.route('/health')
 def health_check():
     return jsonify({"status": "healthy"}), 200
+
+@app.route('/ask_followup', methods=['POST'])
+def ask_followup():
+    data = request.get_json()
+    question = data.get('question')
+    
+    if not question:
+        return jsonify({'error': 'No question provided'}), 400
+    
+    try:
+        # Get the reading from the session
+        reading = session.get('reading')
+        if not reading:
+            return jsonify({'error': 'No previous reading found'}), 400
+        
+        # Create a prompt that includes the previous reading and the follow-up question
+        prompt = f"""Previous reading: {reading}
+
+Follow-up question: {question}
+
+Please provide a tarot reading that addresses this follow-up question while considering the context of the previous reading. Focus on providing specific guidance and insights that build upon the previous reading."""
+        
+        # Get response from OpenAI
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a wise and insightful tarot reader. Provide detailed, thoughtful readings that offer specific guidance and insights."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1000
+        )
+        
+        # Extract the reading from the response
+        reading = response.choices[0].message.content.strip()
+        
+        # Store the reading in the session
+        session['reading'] = reading
+        
+        return jsonify({'reading': reading})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5003) 
